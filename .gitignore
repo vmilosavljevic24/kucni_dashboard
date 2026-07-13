@@ -1,0 +1,11 @@
+# Baza podataka - lokalna, ne ide na GitHub
+*.db
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Editor
+.vscode/
