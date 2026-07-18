@@ -2,8 +2,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from datetime import datetime, date
 from database import init_db, get_db
-from models import NovoHranjenje, Hranjenje
-
+from models import NovoHranjenje, Hranjenje, NoviPosao, Posao
 app = FastAPI(title="Pametni Porodični Dashboard")
 
 @app.on_event("startup")
@@ -44,6 +43,48 @@ def dodaj_hranjenje(hranjenje: NovoHranjenje):
         novi_id = cursor.lastrowid
 
     return {"id": novi_id, "ko_je_hranio": hranjenje.ko_je_hranio, "vreme": vreme_sada}
+
+@app.get("/api/poslovi", response_model=list[Posao])
+def get_poslovi():
+    """Vraća sve aktivne (nezavršene) poslove, najnoviji prvo."""
+    with get_db() as conn:
+        cursor = conn.execute(
+            "SELECT * FROM poslovi WHERE zavrsen = 0 ORDER BY kreiran DESC"
+        )
+        redovi = cursor.fetchall()
+
+    return [dict(red) for red in redovi]
+
+
+@app.post("/api/poslovi", response_model=Posao)
+def dodaj_posao(posao: NoviPosao):
+    """Dodaje novi posao na listu."""
+    vreme_sada = datetime.now().isoformat(timespec="seconds")
+
+    with get_db() as conn:
+        cursor = conn.execute(
+            "INSERT INTO poslovi (naziv, zavrsen, kreiran) VALUES (?, 0, ?)",
+            (posao.naziv, vreme_sada)
+        )
+        conn.commit()
+        novi_id = cursor.lastrowid
+
+    return {"id": novi_id, "naziv": posao.naziv, "zavrsen": 0, "kreiran": vreme_sada, "zavrsen_u": None}
+
+
+@app.patch("/api/poslovi/{posao_id}/zavrsi")
+def zavrsi_posao(posao_id: int):
+    """Označava posao kao završen (postavlja zavrsen=1 i beleži vreme)."""
+    vreme_sada = datetime.now().isoformat(timespec="seconds")
+
+    with get_db() as conn:
+        conn.execute(
+            "UPDATE poslovi SET zavrsen = 1, zavrsen_u = ? WHERE id = ?",
+            (vreme_sada, posao_id)
+        )
+        conn.commit()
+
+    return {"poruka": "Posao oznacen kao zavrsen", "id": posao_id}
 
 # Servira frontend fajlove (HTML, JS, CSS) - MORA biti poslednje u fajlu
 app.mount("/", StaticFiles(directory="../frontend", html=True), name="frontend")    

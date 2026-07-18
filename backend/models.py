@@ -10,3 +10,16 @@ class Hranjenje(BaseModel):
     id: int
     ko_je_hranio: str
     vreme: str
+
+class NoviPosao(BaseModel):
+    """Podaci koje frontend šalje kad se dodaje novi posao."""
+    naziv: str
+
+
+class Posao(BaseModel):
+    """Podaci koje backend vraća za jedan posao."""
+    id: int
+    naziv: str
+    zavrsen: int
+    kreiran: str
+    zavrsen_u: str | None = None
