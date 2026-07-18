@@ -51,6 +51,7 @@ async function nahraniHenrija(ime) {
     });
 
     ucitajHranjenja(); // osveži tabelu odmah nakon dodavanja
+    ucitajStatusHenrija(); // osveži status hranjenja
 }
 
 // Učitava i prikazuje listu hranjenja
@@ -194,6 +195,24 @@ document.getElementById("input-novi-artikal").addEventListener("keydown", (e) =>
     if (e.key === "Enter") dodajArtikal();
 });
 
+async function ucitajStatusHenrija() {
+    const odgovor = await fetch(`${API_URL}/hranjenja/status`);
+    const status = await odgovor.json();
+
+    const box = document.getElementById("status-henri");
+    box.textContent = status.ko ? `${status.poruka} (${status.ko})` : status.poruka;
+
+    // Boja zavisi od toga koliko je davno hranjen
+    box.classList.remove("bg-green-500", "bg-yellow-500", "bg-red-500");
+
+    if (status.pre_koliko_sati === null || status.pre_koliko_sati >= 8) {
+        box.classList.add("bg-red-500");
+    } else if (status.pre_koliko_sati >= 4) {
+        box.classList.add("bg-yellow-500");
+    } else {
+        box.classList.add("bg-green-500");
+    }
+}
 // Pokreni pri učitavanju
 ucitajKupovinu();
 // Pokreni pri učitavanju
@@ -201,3 +220,4 @@ ucitajPoslove();
 // Pokreni sve kad se stranica učita
 iscrtajDugmice();
 ucitajHranjenja();
+ucitajStatusHenrija();
