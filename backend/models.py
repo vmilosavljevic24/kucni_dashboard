@@ -23,3 +23,15 @@ class Posao(BaseModel):
     zavrsen: int
     kreiran: str
     zavrsen_u: str | None = None
+
+class NoviArtikal(BaseModel):
+    """Podaci koje frontend šalje kad se dodaje novi artikal."""
+    artikal: str
+
+
+class Artikal(BaseModel):
+    """Podaci koje backend vraća za jedan artikal."""
+    id: int
+    artikal: str
+    kupljen: int
+    kreiran: str
