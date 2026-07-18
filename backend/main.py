@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from datetime import datetime, date
 from database import init_db, get_db
 from models import NovoHranjenje, Hranjenje
@@ -33,7 +34,7 @@ def get_hranjenja():
 def dodaj_hranjenje(hranjenje: NovoHranjenje):
     """Beleži novo hranjenje sa trenutnim vremenom."""
     vreme_sada = datetime.now().isoformat(timespec="seconds")
-
+    
     with get_db() as conn:
         cursor = conn.execute(
             "INSERT INTO hranjenja (ko_je_hranio, vreme) VALUES (?, ?)",
@@ -43,3 +44,6 @@ def dodaj_hranjenje(hranjenje: NovoHranjenje):
         novi_id = cursor.lastrowid
 
     return {"id": novi_id, "ko_je_hranio": hranjenje.ko_je_hranio, "vreme": vreme_sada}
+
+# Servira frontend fajlove (HTML, JS, CSS) - MORA biti poslednje u fajlu
+app.mount("/", StaticFiles(directory="../frontend", html=True), name="frontend")    

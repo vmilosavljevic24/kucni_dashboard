@@ -1,5 +1,5 @@
 const CLANOVI_PORODICE = ["Vasa", "Ana", "Jole"];
-const API_URL = "http://localhost:8000/api";
+const API_URL = "/api";
 
 // Kreira dugmiće za svakog člana porodice
 function iscrtajDugmice() {
