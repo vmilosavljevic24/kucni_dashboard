@@ -144,5 +144,33 @@ def obrisi_artikal(artikal_id: int):
 
     return {"poruka": "Artikal obrisan", "id": artikal_id}
 
+@app.get("/api/hranjenja/status")
+def status_henrija():
+    """Vraca informaciju o tome kada je Henri poslednji put hranjen i koliko je davno to bilo."""
+    with get_db() as conn:
+        cursor = conn.execute(
+            "SELECT * FROM hranjenja ORDER BY vreme DESC LIMIT 1"
+        )
+        poslednje = cursor.fetchone()
+
+    if poslednje is None:
+        return {"hranjen": False, "poruka": "Henri danas nije hranjen!", "ko": None, "pre_koliko_sati": None}
+
+    vreme_hranjenja = datetime.fromisoformat(poslednje["vreme"])
+    proteklo = datetime.now() - vreme_hranjenja
+    sati = proteklo.total_seconds() / 3600
+
+    if sati < 4:
+        poruka = f"Hranjen pre {round(sati * 60)} min" if sati < 1 else f"Hranjen pre {round(sati, 1)}h"
+    else:
+        poruka = f"Nije hranjen već {round(sati, 1)}h!"
+
+    return {
+        "hranjen": sati < 8,
+        "poruka": poruka,
+        "ko": poslednje["ko_je_hranio"],
+        "pre_koliko_sati": round(sati, 2)
+    }
+
 # Servira frontend fajlove (HTML, JS, CSS) - MORA biti poslednje u fajlu
 app.mount("/", StaticFiles(directory="../frontend", html=True), name="frontend")    
