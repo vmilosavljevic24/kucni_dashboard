@@ -1,6 +1,33 @@
 const CLANOVI_PORODICE = ["Vasa", "Ana", "Jole"];
 const API_URL = "/api";
 
+// --- Prebacivanje tabova ---
+function prikaziTab(imeTaba) {
+    // Sakrij sve sekcije, pa prikaži samo izabranu
+    document.querySelectorAll(".tab-sadrzaj").forEach(sekcija => {
+        sekcija.classList.add("hidden");
+    });
+    document.getElementById(`tab-${imeTaba}`).classList.remove("hidden");
+
+    // Vizuelno oznaci aktivno dugme (plavo), ostala vrati na normalno
+    document.querySelectorAll(".tab-dugme").forEach(dugme => {
+        if (dugme.dataset.tab === imeTaba) {
+            dugme.classList.add("bg-blue-500", "text-white");
+            dugme.classList.remove("text-gray-500");
+        } else {
+            dugme.classList.remove("bg-blue-500", "text-white");
+            dugme.classList.add("text-gray-500");
+        }
+    });
+}
+
+// Svako dugme sa klasom .tab-dugme (i gore i dole) reaguje na klik
+document.querySelectorAll(".tab-dugme").forEach(dugme => {
+    dugme.addEventListener("click", () => prikaziTab(dugme.dataset.tab));
+});
+
+// Pri učitavanju stranice, prikazi Henri tab kao pocetni
+prikaziTab("henri");
 // Kreira dugmiće za svakog člana porodice
 function iscrtajDugmice() {
     const kontejner = document.getElementById("dugmici-clanovi");
